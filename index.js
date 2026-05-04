@@ -4,10 +4,12 @@ const qrcode = require('qrcode-terminal');
 // Configuração do cliente preparada para o Render
 const bot = new Client({
     authStrategy: new LocalAuth({
-        dataPath: './.wwebjs_auth' // Define um caminho local para a sessão
+        dataPath: './.wwebjs_auth'
     }),
     puppeteer: {
         headless: true,
+        // ESTA LINHA É A CHAVE: aponta para onde o Render instalou o Chrome
+        executablePath: '/opt/render/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome',
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
