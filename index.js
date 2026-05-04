@@ -14,7 +14,7 @@ const bot = new Client({
     authStrategy: new LocalAuth({
         dataPath: './.wwebjs_auth'
     }),
-   puppeteer: {
+puppeteer: {
         headless: true,
         executablePath: './chrome-linux/chrome',
         args: [
@@ -24,7 +24,8 @@ const bot = new Client({
             '--no-zygote',
             '--single-process',
             '--disable-gpu',
-            '--user-data-dir=/tmp/puppeteer_user_data' // Força uma sessão limpa
+            '--remote-debugging-port=9222', // Evita conflitos de porta interna
+            '--user-data-dir=/tmp/session-' + Date.now() // Cria uma pasta única por execução
         ]
     }
 });
