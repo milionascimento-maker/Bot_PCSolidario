@@ -6,10 +6,10 @@ const bot = new Client({
     authStrategy: new LocalAuth({
         dataPath: './.wwebjs_auth'
     }),
-    puppeteer: {
+ puppeteer: {
         headless: true,
-        // ESTA LINHA É A CHAVE: aponta para onde o Render instalou o Chrome
-        executablePath: '/opt/render/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome',
+        // Novo caminho apontando para dentro da pasta do seu projeto
+        executablePath: './chrome-linux/chrome',
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
