@@ -1,5 +1,13 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
+const express = require('express');
 
+// 1. Configuração do Servidor Web (Necessário para o Render não desligar o bot)
+const app = express();
+const port = process.env.PORT || 3000;
+app.get('/', (req, res) => res.send('Bot PC Solidário está ativo!'));
+app.listen(port, () => console.log(`Monitoramento ativo na porta ${port}`));
+
+// 2. Configuração do Bot
 const bot = new Client({
     authStrategy: new LocalAuth({
         dataPath: './.wwebjs_auth'
@@ -12,28 +20,36 @@ const bot = new Client({
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--no-zygote',
-            '--single-process'
+            '--single-process',
+            '--disable-gpu' // Deixa o navegador mais leve
         ]
     }
 });
 
-// ALTERAÇÃO AQUI: Em vez de QR Code, gera o código de 8 dígitos
+// 3. Conexão por Código de Emparelhamento
 bot.on('qr', async (qr) => {
-    console.log('⚠️ O QR Code foi gerado, mas vamos usar o Código de Emparelhamento...');
-    try {
-        // COLOQUE SEU NÚMERO ABAIXO (Ex: 5591988887777)
-        const code = await bot.requestPairingCode('55919XXXXXXXX'); 
-        console.log('✅ SEU CÓDIGO DE CONEXÃO É:', code);
-        console.log('No celular: Aparelhos Conectados > Conectar com número de telefone.');
-    } catch (err) {
-        console.error('Erro ao gerar código:', err);
-    }
+    console.log('⚠️ Aguardando estabilização para gerar código de conexão...');
+    
+    // Pequeno atraso para o Chrome carregar totalmente no servidor
+    setTimeout(async () => {
+        try {
+            // LEMBRETE: Troque os X pelo seu número real (ex: 5591988887777)
+            const code = await bot.requestPairingCode('55919XXXXXXXX'); 
+            console.log('----------------------------');
+            console.log('✅ SEU CÓDIGO DE CONEXÃO É:', code);
+            console.log('----------------------------');
+            console.log('No celular: Aparelhos Conectados > Conectar com número de telefone.');
+        } catch (err) {
+            console.error('Erro ao gerar código:', err);
+        }
+    }, 10000); // 10 segundos de espera
 });
 
 bot.on('ready', () => {
     console.log('🚀 PC Solidário Online em Belém!');
 });
 
+// 4. Lógica de Mensagens
 bot.on('message', async (msg) => {
     if (msg.from.endsWith('@g.us')) return;
 
