@@ -1,14 +1,11 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
 
-// Configuração do cliente preparada para o Render
 const bot = new Client({
     authStrategy: new LocalAuth({
         dataPath: './.wwebjs_auth'
     }),
- puppeteer: {
+    puppeteer: {
         headless: true,
-        // Novo caminho apontando para dentro da pasta do seu projeto
         executablePath: './chrome-linux/chrome',
         args: [
             '--no-sandbox',
@@ -20,31 +17,34 @@ const bot = new Client({
     }
 });
 
-// 1. Geração do QR Code nos Logs
-bot.on('qr', (qr) => {
-    console.log('✅ ESCANEIE O QR CODE ABAIXO:');
-    qrcode.generate(qr, { small: true });
+// ALTERAÇÃO AQUI: Em vez de QR Code, gera o código de 8 dígitos
+bot.on('qr', async (qr) => {
+    console.log('⚠️ O QR Code foi gerado, mas vamos usar o Código de Emparelhamento...');
+    try {
+        // COLOQUE SEU NÚMERO ABAIXO (Ex: 5591988887777)
+        const code = await bot.requestPairingCode('55919XXXXXXXX'); 
+        console.log('✅ SEU CÓDIGO DE CONEXÃO É:', code);
+        console.log('No celular: Aparelhos Conectados > Conectar com número de telefone.');
+    } catch (err) {
+        console.error('Erro ao gerar código:', err);
+    }
 });
 
-// 2. Confirmação de que está online
 bot.on('ready', () => {
     console.log('🚀 PC Solidário Online em Belém!');
 });
 
-// 3. Lógica de Mensagens
 bot.on('message', async (msg) => {
-    if (msg.from.endsWith('@g.us')) return; // Ignora grupos
+    if (msg.from.endsWith('@g.us')) return;
 
     const chat = await msg.getChat();
     const texto = msg.body.toLowerCase().trim();
 
-    // Função para simular "digitando..."
     const digitar = async () => {
         await chat.sendStateTyping();
         await new Promise(res => setTimeout(res, 2000));
     };
 
-    // Menu Inicial e Saudações
     if (['oi', 'olá', 'ola', 'menu', 'bom dia', 'boa tarde', 'boa noite'].includes(texto)) {
         await digitar();
         await bot.sendMessage(msg.from, 
@@ -56,7 +56,6 @@ bot.on('message', async (msg) => {
             `*Digite apenas o número da opção.*`);
     } 
     
-    // Opção 1 - Doação
     else if (texto === '1' || texto.includes('doar') || texto.includes('doação')) {
         await digitar();
         await bot.sendMessage(msg.from, 
@@ -69,7 +68,6 @@ bot.on('message', async (msg) => {
             `• Onde podemos buscar?:`);
     }
 
-    // Opção 2 - Sobre o projeto
     else if (texto === '2' || texto.includes('projeto') || texto.includes('quem somos')) {
         await digitar();
         await bot.sendMessage(msg.from, 
@@ -77,7 +75,6 @@ bot.on('message', async (msg) => {
             `Nossos alunos recondicionam os equipamentos que depois são doados para quem mais precisa em Belém.`);
     }
 
-    // Opção 3 - Endereço e Contatos
     else if (texto === '3' || texto.includes('local') || texto.includes('endereço')) {
         await digitar();
         await bot.sendMessage(msg.from, 
@@ -87,5 +84,4 @@ bot.on('message', async (msg) => {
     }
 });
 
-// Inicialização única
 bot.initialize();
