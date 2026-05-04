@@ -47,7 +47,7 @@ const bot = new Client({
 bot.on('qr', async (qr) => {
     console.log('⚠️ Página do WhatsApp carregada! Tentando gerar código...');
     try {
-        const meuNumero = '5591985796419'; 
+        const meuNumero = '559185796419'; 
         const code = await bot.requestPairingCode(meuNumero); 
         pinConexao = code; // Salva o código para exibir na rota /codigo
         console.log('------------------------------------------');
