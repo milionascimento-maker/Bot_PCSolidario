@@ -1,16 +1,32 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const express = require('express');
 
-// 1. Servidor de Monitoramento (Essencial para o Render)
+// 1. Servidor de Monitoramento e Visualização de Código
 const app = express();
 const port = process.env.PORT || 3000;
-app.get('/', (req, res) => res.send('Bot PC Solidário Ativo!'));
+let pinConexao = "Aguardando o WhatsApp carregar... Atualize a página em 1 minuto.";
+
+app.get('/', (req, res) => {
+    res.send('<h1>Bot PC Solidário Ativo!</h1><p>Acesse <b>/codigo</b> para ver o PIN de emparelhamento.</p>');
+});
+
+app.get('/codigo', (req, res) => {
+    res.send(`
+        <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+            <h1>Código de Conexão WhatsApp</h1>
+            <div style="background: #f0f0f0; padding: 20px; display: inline-block; border-radius: 10px;">
+                <h2 style="color: #25D366; font-size: 40px; margin: 0;">${pinConexao}</h2>
+            </div>
+            <p>Número alvo: <b>5591985796419</b></p>
+            <p><i>Atualize a página (F5) se o código ainda não apareceu.</i></p>
+        </div>
+    `);
+});
+
 app.listen(port, () => console.log(`✅ Servidor Web na porta ${port}`));
 
-// 2. Configuração do Bot (Isolamento Total)
+// 2. Configuração do Bot
 const bot = new Client({
-    // LocalAuth desativado temporariamente para limpar erros de sessão anteriores
-    // authStrategy: new LocalAuth({ dataPath: './.wwebjs_auth' }), 
     puppeteer: {
         headless: true,
         executablePath: './chrome-linux/chrome',
@@ -29,21 +45,22 @@ const bot = new Client({
 
 // 3. Geração do Código de Emparelhamento
 bot.on('qr', async (qr) => {
-    console.log('⚠️ Página do WhatsApp carregada!');
+    console.log('⚠️ Página do WhatsApp carregada! Tentando gerar código...');
     try {
-        // Número formatado conforme sua informação
         const meuNumero = '5591985796419'; 
         const code = await bot.requestPairingCode(meuNumero); 
+        pinConexao = code; // Salva o código para exibir na rota /codigo
         console.log('------------------------------------------');
         console.log('👉 SEU CÓDIGO DE CONEXÃO É:', code);
         console.log('------------------------------------------');
-        console.log('No celular: Aparelhos Conectados > Conectar com número de telefone');
     } catch (err) {
-        console.log('Aguardando carregamento para gerar código...');
+        pinConexao = "Erro ao gerar código. Tentando novamente...";
+        console.log('Erro ao pedir código:', err);
     }
 });
 
 bot.on('ready', () => {
+    pinConexao = "CONECTADO! ✅";
     console.log('🚀 PC Solidário ONLINE em Belém!');
 });
 
