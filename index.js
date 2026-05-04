@@ -8,6 +8,8 @@ app.get('/', (req, res) => res.send('Bot PC Solidário está ativo!'));
 app.listen(port, () => console.log(`Monitoramento ativo na porta ${port}`));
 
 // 2. Configuração do Bot
+// ... (mantenha o express no topo)
+
 const bot = new Client({
     authStrategy: new LocalAuth({
         dataPath: './.wwebjs_auth'
@@ -21,30 +23,33 @@ const bot = new Client({
             '--disable-dev-shm-usage',
             '--no-zygote',
             '--single-process',
-            '--disable-gpu' // Deixa o navegador mais leve
+            '--disable-gpu',
+            '--disable-extensions' // Deixa mais leve
         ]
     }
 });
 
-// 3. Conexão por Código de Emparelhamento
-bot.on('qr', async (qr) => {
-    console.log('⚠️ Aguardando estabilização para gerar código de conexão...');
-    
-    // Pequeno atraso para o Chrome carregar totalmente no servidor
-    setTimeout(async () => {
-        try {
-            // LEMBRETE: Troque os X pelo seu número real (ex: 5591988887777)
-            const code = await bot.requestPairingCode('55919XXXXXXXX'); 
-            console.log('----------------------------');
-            console.log('✅ SEU CÓDIGO DE CONEXÃO É:', code);
-            console.log('----------------------------');
-            console.log('No celular: Aparelhos Conectados > Conectar com número de telefone.');
-        } catch (err) {
-            console.error('Erro ao gerar código:', err);
-        }
-    }, 10000); // 10 segundos de espera
+// Forçando a conexão por código logo após o carregamento
+bot.on('ready', () => {
+    console.log('🚀 PC Solidário Online em Belém!');
 });
 
+// O segredo: esperar o estado "loading" para pedir o código
+bot.on('qr', async (qr) => {
+    console.log('⚠️ Página carregada. Gerando código de emparelhamento...');
+    try {
+        // MUITO IMPORTANTE: Verifique se este número está no seu código agora!
+        // Formato: 55 + DDD + Numero (ex: 5591988887777)
+        const code = await bot.requestPairingCode('55919XXXXXXXX'); 
+        console.log('----------------------------');
+        console.log('✅ SEU CÓDIGO DE CONEXÃO É:', code);
+        console.log('----------------------------');
+    } catch (err) {
+        console.log('Tentando gerar código novamente em 5 segundos...');
+    }
+});
+
+bot.initialize();
 bot.on('ready', () => {
     console.log('🚀 PC Solidário Online em Belém!');
 });
