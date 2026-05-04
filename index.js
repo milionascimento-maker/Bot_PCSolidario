@@ -3,9 +3,15 @@ const qrcode = require('qrcode-terminal');
 
 const bot = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: {
+puppeteer: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--no-zygote',
+            '--single-process'
+        ]
     }
 });
 
