@@ -25,16 +25,17 @@ app.listen(port, () => console.log(`✅ Servidor na porta ${port}`));
 
 // 2. Configuração do Bot corrigida para Linux/Google Cloud
 const bot = new Client({
-    authStrategy: new LocalAuth(), // Salva a sessão para não pedir QR Code toda hora
+    authStrategy: new LocalAuth(),
     puppeteer: {
         headless: true,
-        executablePath: '/usr/bin/google-chrome-stable', // Caminho correto no Linux
+        executablePath: '/usr/bin/google-chrome-stable',
         args: [
-            '--no-sandbox', 
-            '--disable-setuid-sandbox', 
-            '--disable-dev-shm-usage', 
-            '--no-zygote', 
-            '--single-process', 
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
             '--disable-gpu'
         ]
     }
