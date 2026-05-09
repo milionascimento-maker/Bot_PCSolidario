@@ -23,11 +23,12 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => console.log(`✅ Servidor na porta ${port}`));
 
-// 2. Configuração do Bot
+// 2. Configuração do Bot corrigida para Linux/Google Cloud
 const bot = new Client({
+    authStrategy: new LocalAuth(), // Salva a sessão para não pedir QR Code toda hora
     puppeteer: {
         headless: true,
-        executablePath: './chrome-linux/chrome',
+        executablePath: '/usr/bin/google-chrome-stable', // Caminho correto no Linux
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox', 
@@ -48,23 +49,21 @@ bot.on('ready', () => {
     console.log('🚀 PC Solidário ONLINE!');
 });
 
-// 3. Lógica de Atendimento com melhorias
+// 3. Lógica de Atendimento
 bot.on('message', async (msg) => {
     if (msg.from.endsWith('@g.us')) return;
 
     const chat = await msg.getChat();
     const texto = msg.body.toLowerCase().trim();
 
-    // Função interna para simular digitação
     const responderComAtraso = async (conteudo) => {
         await chat.sendStateTyping();
-        await new Promise(res => setTimeout(res, 2000)); // Espera 2 segundos
+        await new Promise(res => setTimeout(res, 2000));
         await bot.sendMessage(msg.from, conteudo);
     };
 
     const saudações = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'menu', 'início', 'inicio'];
 
-    // MENU PRINCIPAL
     if (saudações.includes(texto)) {
         await responderComAtraso(
             `Olá! 👋 Bem-vindo ao *PC Solidário*.\n\n` +
@@ -75,8 +74,6 @@ bot.on('message', async (msg) => {
             `*Digite apenas o número da opção.*`
         );
     } 
-
-    // OPÇÃO 1: FICHA DE DOAÇÃO
     else if (texto === '1') {
         await responderComAtraso(
             `📝 *FICHA DE DOAÇÃO*\n\n` +
@@ -90,8 +87,6 @@ bot.on('message', async (msg) => {
             `_Dica: Você pode copiar esta mensagem, preencher e nos enviar de volta!_ 🤝♻️`
         );
     }
-
-    // OPÇÃO 2: SOBRE O PROJETO (REVISADO)
     else if (texto === '2') {
         await responderComAtraso(
             `O **PC Solidário** é um projeto social que visa arrecadar e recondicionar computadores em desuso para doação em comunidades de Belém! ♻️\n\n` +
@@ -100,12 +95,9 @@ bot.on('message', async (msg) => {
             `Venha e faça parte dessa rede de solidariedade! Ajude uma comunidade a ter acesso à inclusão digital e a novas oportunidades. ✨`
         );
     }
-
-    // OPÇÃO 3: LOCAL DE ENTREGA
     else if (texto === '3') {
         await responderComAtraso(
             `📍 *Endereço:* R. Aristides Lobo, 1058 - Campina, Belém - PA, 66017-010\n` +
-            `🗺️ https://maps.app.goo.gl/GRRE6omOpJIR8ESLv\n\n` +
             `📸 *Instagram:* @pcsolidario\n\n` +
             `Aguardamos você! 🚀`
         );
